@@ -79,6 +79,25 @@ const Utils = {
     `;
   },
 
+  // Check if answer is correct, forgiving common suffixes and formatting
+  checkAnswer(opt, ans) {
+    if (!opt || !ans) return false;
+    opt = opt.trim();
+    ans = ans.trim();
+    if (opt === ans) return true;
+    
+    if (ans.startsWith(opt + ' ')) return true;
+    if (opt.startsWith(ans + ' ')) return true;
+    
+    const suffixes = [' में', ' से', ' का', ' की', ' के', ' को', ' पर', ' हैं', ' है'];
+    for (let s of suffixes) {
+      if (ans === opt + s) return true;
+      if (opt === ans + s) return true;
+    }
+    
+    return false;
+  },
+
   // Draw bar chart on canvas
   drawBarChart(canvas, data, options = {}) {
     const ctx = canvas.getContext('2d');

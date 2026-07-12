@@ -180,7 +180,7 @@ function renderQuizPage(params) {
           ${q.opts.map((opt, i) => {
             let cls = '';
             if (s.locked) {
-              if (opt === q.a) cls = 'correct';
+              if (Utils.checkAnswer(opt, q.a)) cls = 'correct';
               else if (opt === s.picked) cls = 'wrong';
               else cls = 'dimmed';
               cls += ' locked';
@@ -215,7 +215,7 @@ function handleQuizChoice(opt) {
   s.picked = opt;
   s.locked = true;
   
-  const isCorrect = opt === q.a;
+  const isCorrect = Utils.checkAnswer(opt, q.a);
   if (isCorrect) {
     s.correct++;
   } else {

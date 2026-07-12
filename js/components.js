@@ -16,7 +16,7 @@ const Components = {
       <header class="app-header" id="app-header">
         <div class="header-inner">
           <div class="header-brand" style="cursor:pointer" onclick="Router.navigate('home')">
-            <span class="brand-icon">🕉️</span>
+            <img src="assets/images/logo.jpeg" class="header-logo" alt="Logo">
             <div>
               <div class="brand-name">संस्कृत सेतु</div>
               <div class="brand-sub">परीक्षा तैयारी मंच</div>

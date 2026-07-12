@@ -9,7 +9,7 @@ function renderLoginPage() {
     <div class="login-page">
       <div class="login-container">
         <div class="login-brand">
-          <span class="brand-symbol">🕉️</span>
+          <img src="assets/images/logo.jpeg" class="brand-logo" alt="Logo">
           <h1>संस्कृत सेतु</h1>
           <p>आपकी संस्कृत परीक्षा तैयारी का विश्वसनीय मंच</p>
         </div>

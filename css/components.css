@@ -265,9 +265,11 @@ textarea.input-field {
   align-items: center;
   gap: var(--space-sm);
 }
-.header-brand .brand-icon {
-  font-size: 28px;
-  color: var(--gold);
+.header-brand .header-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
 }
 .header-brand .brand-name {
   font-family: var(--font-hindi);
