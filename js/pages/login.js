@@ -127,7 +127,11 @@ function handleLogin(e) {
   const result = Store.loginUser(email, password);
   if (result.ok) {
     _refreshAppShell();
-    Components.showToast('स्वागतम्! 🙏', 'success');
+    if (result.user.isAdmin) {
+      Components.showToast('स्वागतम् Admin! 🙏', 'success');
+    } else {
+      Components.showToast('स्वागतम्! 🙏', 'success');
+    }
     Router.navigate('home');
   } else {
     errorEl.textContent = result.error;

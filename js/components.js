@@ -34,13 +34,19 @@ const Components = {
 
   // ── Bottom Navigation ── //
   renderBottomNav() {
+    const user = Store.getUser();
+    const isAdmin = user ? (user.isAdmin || false) : false;
+
     const items = [
       { page: 'home',      icon: '🏠', label: 'मुख्य' },
-      { page: 'dashboard', icon: '📊', label: 'तैयारी' },
-      { page: 'exams',     icon: '📝', label: 'परीक्षा' },
-      { page: 'analytics', icon: '📈', label: 'विश्लेषण' },
+      { page: 'exams',     icon: '📝', label: 'टेस्ट' },
+      { page: 'pass',      icon: '🎟️', label: 'पास' },
       { page: 'profile',   icon: '👤', label: 'प्रोफ़ाइल' }
     ];
+
+    if (isAdmin) {
+      items.push({ page: 'admin', icon: '👑', label: 'Admin' });
+    }
 
     return `
       <nav class="bottom-nav" id="bottom-nav">
@@ -160,5 +166,26 @@ const Components = {
     overlay.onclick = (e) => {
       if (e.target === overlay) document.body.removeChild(overlay);
     };
+  },
+
+  showVideoModal(title, videoUrl = 'https://www.youtube.com/embed/dQw4w9WgXcQ') {
+    const modalId = 'video-modal-' + Date.now();
+    const modalHtml = `
+      <div id="${modalId}" class="modal-overlay" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);z-index:9999;display:flex;align-items:center;justify-content:center;padding:var(--space-md)">
+        <div class="modal-content" style="background:var(--bg-elevated);width:100%;max-width:800px;border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-glow)">
+          <div style="padding:var(--space-md);display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--glass-border)">
+            <h3 style="font-size:var(--fs-md);margin:0">${title}</h3>
+            <button onclick="document.getElementById('${modalId}').remove()" class="btn btn-ghost btn-sm" style="font-size:24px;line-height:1;padding:0;width:32px;height:32px;display:flex;align-items:center;justify-content:center">&times;</button>
+          </div>
+          <div style="position:relative;width:100%;padding-bottom:56.25%;background:#000">
+            <iframe style="position:absolute;top:0;left:0;width:100%;height:100%;border:none" src="${videoUrl}?autoplay=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+          </div>
+          <div style="padding:var(--space-md)">
+            <p style="color:var(--text-secondary);font-size:var(--fs-sm);margin:0">यह एक डेमो वीडियो प्लेयर है। असली प्लेटफॉर्म में यहाँ आपके शिक्षकों द्वारा लाइव स्ट्रीम या रिकॉर्डेड वीडियो होगा।</p>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
   }
 };

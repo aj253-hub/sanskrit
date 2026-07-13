@@ -106,10 +106,10 @@ const Router = {
     document.querySelectorAll('.nav-item').forEach(el => {
       el.classList.toggle('active', el.dataset.page === path || 
         (el.dataset.page === 'home' && path === 'home') ||
-        (el.dataset.page === 'dashboard' && path === 'dashboard') ||
+        (el.dataset.page === 'classes' && path === 'classes') ||
         (el.dataset.page === 'exams' && ['exams', 'practice-gk', 'practice-cuet', 'quiz', 'results'].includes(path)) ||
-        (el.dataset.page === 'analytics' && path === 'analytics') ||
-        (el.dataset.page === 'profile' && ['profile', 'notes', 'bookmarks'].includes(path))
+        (el.dataset.page === 'pass' && path === 'pass') ||
+        (el.dataset.page === 'profile' && ['profile', 'notes', 'bookmarks', 'materials'].includes(path))
       );
     });
   }

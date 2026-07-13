@@ -28,6 +28,20 @@ const CUET_UNITS = [
   { id: 'gadya', num: 'इकाई-9', label: 'गद्य-पद्य बोध' }
 ];
 
+// ── NTA UGC NET Unit Definitions ── //
+const NTA_UNITS = [
+  { id: 'nta-unit-1', num: 'इकाई-1', label: 'वैदिक साहित्य (सामान्य परिचय)' },
+  { id: 'nta-unit-2', num: 'इकाई-2', label: 'वैदिक साहित्य (विशिष्ट अध्ययन)' },
+  { id: 'nta-unit-3', num: 'इकाई-3', label: 'दर्शन (सामान्य परिचय)' },
+  { id: 'nta-unit-4', num: 'इकाई-4', label: 'दर्शन (विशिष्ट अध्ययन)' },
+  { id: 'nta-unit-5', num: 'इकाई-5', label: 'व्याकरण एवं भाषाविज्ञान (सामान्य)' },
+  { id: 'nta-unit-6', num: 'इकाई-6', label: 'व्याकरण (विशिष्ट अध्ययन)' },
+  { id: 'nta-unit-7', num: 'इकाई-7', label: 'संस्कृत साहित्य एवं काव्यशास्त्र' },
+  { id: 'nta-unit-8', num: 'इकाई-8', label: 'साहित्य (विशिष्ट अध्ययन)' },
+  { id: 'nta-unit-9', num: 'इकाई-9', label: 'पुराणेतिहास एवं धर्मशास्त्र' },
+  { id: 'nta-unit-10', num: 'इकाई-10', label: 'धर्मशास्त्र एवं अभिलेख (विशिष्ट)' }
+];
+
 // ── Raw GK Questions ── //
 const _RAW_GK = [
   {cat:"general",q:"वाणी के कितने भेद होते हैं?",a:"चार",opts:["चार","तीन","पाँच","दो"]},
@@ -186,11 +200,37 @@ const _RAW_CUET = [
   {unit:"gadya",q:"'शिशुपालवधम्' किसकी रचना है?",a:"माघ",opts:["माघ","भारवि","कालिदास","श्रीहर्ष"]}
 ];
 
+// ── NTA UGC NET Questions ── //
+const _RAW_NTA = [
+  {unit:"nta-unit-1",q:"वेदों का अपौरुषेयत्व सिद्धान्त किसने प्रतिपादित किया?",a:"मीमांसकों ने",opts:["मीमांसकों ने","नैयायिकों ने","सांख्य ने","बौद्धों ने"]},
+  {unit:"nta-unit-1",q:"शतपथ ब्राह्मण किस वेद से सम्बद्ध है?",a:"शुक्ल यजुर्वेद",opts:["शुक्ल यजुर्वेद","ऋग्वेद","सामवेद","अथर्ववेद"]},
+  {unit:"nta-unit-2",q:"नासदीय सूक्त (10.129) का देवता कौन है?",a:"परमात्मा (भाववृत्त)",opts:["परमात्मा (भाववृत्त)","इन्द्र","अग्नि","वरुण"]},
+  {unit:"nta-unit-2",q:"निरुक्त के अनुसार पदों के कितने भेद हैं?",a:"चार (नाम, आख्यात, उपसर्ग, निपात)",opts:["चार","दो","तीन","पाँच"]},
+  {unit:"nta-unit-3",q:"सांख्य दर्शन के अनुसार तत्त्वों की संख्या कितनी है?",a:"२५",opts:["२५","१६","७","९"]},
+  {unit:"nta-unit-3",q:"योग दर्शन में 'चित्तभूमि' कितनी मानी गई हैं?",a:"पाँच",opts:["पाँच","चार","तीन","छह"]},
+  {unit:"nta-unit-4",q:"वेदान्तसार के अनुसार 'अज्ञान' क्या है?",a:"भावरूप, अनिर्वचनीय",opts:["भावरूप, अनिर्वचनीय","अभावरूप","सत्","असत्"]},
+  {unit:"nta-unit-4",q:"तर्कभाषा के अनुसार 'कारण' कितने प्रकार के होते हैं?",a:"तीन",opts:["तीन","चार","दो","पाँच"]},
+  {unit:"nta-unit-5",q:"पाणिनीय शिक्षा के अनुसार उच्चारण स्थान कितने हैं?",a:"आठ",opts:["आठ","पाँच","सात","नौ"]},
+  {unit:"nta-unit-5",q:"भाषाविज्ञान के अनुसार 'ग्रिम-नियम' का सम्बन्ध किससे है?",a:"ध्वनि-परिवर्तन से",opts:["ध्वनि-परिवर्तन से","अर्थ-परिवर्तन से","पद-विचार से","वाक्य-विचार से"]},
+  {unit:"nta-unit-6",q:"'वृद्धिरादैच्' सूत्र से किस संज्ञा का विधान होता है?",a:"वृद्धि संज्ञा",opts:["वृद्धि संज्ञा","गुण संज्ञा","सवर्ण संज्ञा","टी संज्ञा"]},
+  {unit:"nta-unit-6",q:"'कारके' सूत्र का अधिकार किस अध्याय में है?",a:"प्रथम अध्याय (चतुर्थ पाद)",opts:["प्रथम अध्याय (चतुर्थ पाद)","द्वितीय अध्याय","तृतीय अध्याय","चतुर्थ अध्याय"]},
+  {unit:"nta-unit-7",q:"'काव्यप्रकाश' के रचयिता कौन हैं?",a:"मम्मट",opts:["मम्मट","विश्वनाथ","आनन्दवर्धन","भामह"]},
+  {unit:"nta-unit-7",q:"ध्वन्यालोक में कितने उद्योत हैं?",a:"चार",opts:["चार","पाँच","छह","आठ"]},
+  {unit:"nta-unit-8",q:"'अभिज्ञानशाकुन्तलम्' के चतुर्थ अंक का नाम क्या है?",a:"विदाई (विदा) अंक",opts:["विदाई (विदा) अंक","आश्रम प्रवेश","सम्मिलन","पश्चात्ताप"]},
+  {unit:"nta-unit-8",q:"'मृच्छकटिकम्' का नायक कौन है?",a:"चारुदत्त",opts:["चारुदत्त","शकार","संवाहक","रोहसेन"]},
+  {unit:"nta-unit-9",q:"मनुस्मृति के अनुसार धर्म के कितने लक्षण हैं?",a:"दस",opts:["दस","आठ","बारह","पाँच"]},
+  {unit:"nta-unit-9",q:"याज्ञवल्क्यस्मृति में कितने अध्याय हैं?",a:"तीन (आचार, व्यवहार, प्रायश्चित्त)",opts:["तीन","चार","दो","पाँच"]},
+  {unit:"nta-unit-10",q:"अशोक के शिलालेख मुख्यतया किस लिपि में हैं?",a:"ब्राह्मी",opts:["ब्राह्मी","खरोष्ठी","शारदा","देवनागरी"]},
+  {unit:"nta-unit-10",q:"गिरनार अभिलेख किस शासक से सम्बन्धित है?",a:"रुद्रदामन",opts:["रुद्रदामन","अशोक","समुद्रगुप्त","स्कन्दगुप्त"]}
+];
+
 // ── Process & assign IDs ── //
 let _qid = 0;
 let QUESTIONS_GK = [];
 let QUESTIONS_CUET = [];
+let QUESTIONS_NTA = [];
 let GK_TESTS = [];
+let NTA_TESTS = [];
 let ALL_QUESTIONS = [];
 let QUESTION_MAP = {};
 
@@ -211,12 +251,19 @@ const Data = {
       bank: 'cuet'
     }));
 
+    let base_nta = _RAW_NTA.map(q => ({
+      ...q,
+      id: `nta_${_qid++}`,
+      bank: 'nta'
+    }));
+
     // Merge custom questions from store
     const customQuestions = (window.Store ? Store.getCustomQuestions() : []);
     
     // Add custom questions or replace existing ones by ID
     const merged_gk = [...base_gk];
     const merged_cuet = [...base_cuet];
+    const merged_nta = [...base_nta];
     
     customQuestions.forEach(cq => {
       if (cq.bank === 'gk') {
@@ -227,11 +274,16 @@ const Data = {
         const existingIdx = merged_cuet.findIndex(q => q.id === cq.id);
         if (existingIdx >= 0) merged_cuet[existingIdx] = cq;
         else merged_cuet.push(cq);
+      } else if (cq.bank === 'nta') {
+        const existingIdx = merged_nta.findIndex(q => q.id === cq.id);
+        if (existingIdx >= 0) merged_nta[existingIdx] = cq;
+        else merged_nta.push(cq);
       }
     });
 
     QUESTIONS_GK = merged_gk;
     QUESTIONS_CUET = merged_cuet;
+    QUESTIONS_NTA = merged_nta;
 
     // ── Build GK test sets (25 questions each, mixed) ── //
     const shuffled = Utils.shuffle([...QUESTIONS_GK]);
@@ -244,8 +296,16 @@ const Data = {
     }
     GK_TESTS = tests;
 
+    // ── Build NTA test sets (150 questions each) - using placeholder duplicates if short ── //
+    // Since we don't have 150 real NTA questions yet, we'll repeat existing for the mock test
+    const mockNtaDeck = [];
+    while (mockNtaDeck.length < 150) {
+       mockNtaDeck.push(...QUESTIONS_NTA);
+    }
+    NTA_TESTS = [Utils.shuffle(mockNtaDeck).slice(0, 150)];
+
     // ── All questions combined ── //
-    ALL_QUESTIONS = [...QUESTIONS_GK, ...QUESTIONS_CUET];
+    ALL_QUESTIONS = [...QUESTIONS_GK, ...QUESTIONS_CUET, ...QUESTIONS_NTA];
 
     // ── Question lookup by ID ── //
     QUESTION_MAP = {};

@@ -208,6 +208,52 @@ const Store = {
     this.set('custom_questions', this.getCustomQuestions().filter(q => q.id !== id));
   },
 
+  // ── Admin: Passes & Courses ── //
+  getPasses() {
+    return this.get('passes', null);
+  },
+
+  savePasses(passes) {
+    this.set('passes', passes);
+  },
+
+  getCourses() {
+    return this.get('courses', null);
+  },
+
+  saveCourses(courses) {
+    this.set('courses', courses);
+  },
+
+  // ── Manual Payment Requests ── //
+  getPendingPayments() {
+    return this.get('pending_payments', []);
+  },
+
+  savePendingPayment(payment) {
+    const payments = this.getPendingPayments();
+    payments.push({ ...payment, id: Utils.uid(), timestamp: Date.now(), status: 'pending' });
+    this.set('pending_payments', payments);
+  },
+
+  updatePendingPaymentStatus(id, status) {
+    const payments = this.getPendingPayments();
+    const idx = payments.findIndex(p => p.id === id);
+    if (idx >= 0) {
+      payments[idx].status = status;
+      this.set('pending_payments', payments);
+    }
+  },
+
+  // ── AI Settings ── //
+  getAiKey() {
+    return this.get('ai_api_key', null);
+  },
+
+  saveAiKey(key) {
+    this.set('ai_api_key', key);
+  },
+
   // ── Daily Stats ── //
   getTodayStats() {
     const progress = this.getProgress();
@@ -305,6 +351,16 @@ const Store = {
 
   logout() {
     this.remove('user');
+  },
+
+  deleteUser(id) {
+    const users = this.getUsers().filter(u => u.id !== id);
+    this.set('all_users', users);
+    // If deleting the current user, log them out
+    const currentUser = this.getUser();
+    if (currentUser && currentUser.id === id) {
+      this.logout();
+    }
   },
 
   isLoggedIn() {

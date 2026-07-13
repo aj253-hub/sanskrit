@@ -30,6 +30,10 @@ const App = {
     Router.register('notes', () => renderNotesPage());
     Router.register('bookmarks', () => renderBookmarksPage());
     Router.register('admin', () => renderAdminPage());
+    Router.register('pass', () => renderPassPage());
+    Router.register('practice-nta', () => renderPracticeNTAPage());
+    Router.register('quiz-nta', (params) => renderNTAQuizPage(params));
+    Router.register('materials', () => renderMaterialsPage());
 
     // Initialize router
     Router.init('app-content');
@@ -37,6 +41,11 @@ const App = {
     // Update streak on load
     if (Store.isLoggedIn()) {
       Store.updateStreak();
+    }
+
+    // Initialize AI Assistant Chatbot
+    if (typeof AI !== 'undefined') {
+      AI.init();
     }
 
     console.log('🕉️ संस्कृत सेतु initialized');
