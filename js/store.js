@@ -84,7 +84,13 @@ const Store = {
     const users = this.getUsers();
     const idx = users.findIndex(u => u.id === updatedUser.id || u.email.toLowerCase() === updatedUser.email.toLowerCase());
     if (idx >= 0) {
+      // Preserve the password from the registry if updatedUser doesn't have one
+      const existingPassword = users[idx].password;
       users[idx] = { ...users[idx], ...updatedUser };
+      // Safety: ensure password is never accidentally removed
+      if (!users[idx].password && existingPassword) {
+        users[idx].password = existingPassword;
+      }
       this.set('all_users', users);
     }
   },
@@ -317,20 +323,22 @@ const Store = {
 
   registerUser(name, email, password) {
     const users = this.getUsers();
-    if (users.find(u => u.email.toLowerCase() === email.toLowerCase())) {
+    const normalizedEmail = email.trim().toLowerCase();
+    const trimmedPassword = password.trim();
+    if (users.find(u => u.email.toLowerCase() === normalizedEmail)) {
       return { ok: false, error: 'यह ईमेल पहले से पंजीकृत है' };
     }
     const user = {
       id: Utils.uid(),
       name,
-      email: email.toLowerCase(),
-      password,
+      email: normalizedEmail,
+      password: trimmedPassword,
       goal: 'CUET',
       joined: Date.now(),
       streak: 0,
       lastActive: Date.now(),
       dailyGoal: 20,
-      isAdmin: email.toLowerCase() === 'admin@sanskritsetu.com'
+      isAdmin: normalizedEmail === 'admin@sanskritsetu.com'
     };
     users.push(user);
     this.set('all_users', users);
@@ -340,16 +348,36 @@ const Store = {
 
   loginUser(email, password) {
     const users = this.getUsers();
-    const user = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
-    if (!user) {
+    const normalizedEmail = email.trim().toLowerCase();
+    const trimmedPassword = password.trim();
+    
+    // Find user by email first
+    const userIdx = users.findIndex(u => u.email.toLowerCase() === normalizedEmail);
+    if (userIdx < 0) {
       return { ok: false, error: 'ईमेल या पासवर्ड गलत है' };
     }
-    this.setUser(user);
+    
+    const user = users[userIdx];
+    
+    // Check password — try exact match first, then trimmed match for legacy accounts
+    const storedPwd = (user.password || '').trim();
+    if (storedPwd !== trimmedPassword) {
+      return { ok: false, error: 'ईमेल या पासवर्ड गलत है' };
+    }
+    
+    // Auto-fix: normalize the stored password if it had whitespace issues
+    if (user.password !== trimmedPassword) {
+      users[userIdx] = { ...user, password: trimmedPassword };
+      this.set('all_users', users);
+    }
+    
+    this.setUser(users[userIdx]);
     this.updateStreak();
-    return { ok: true, user };
+    return { ok: true, user: users[userIdx] };
   },
 
   logout() {
+    // Only remove the session user, preserve the all_users registry so login works after logout
     this.remove('user');
   },
 
