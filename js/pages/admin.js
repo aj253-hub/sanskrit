@@ -3,8 +3,8 @@
    Manage Questions, Passes, Courses, and View Users
    ============================================================ */
 
-function renderAdminPage() {
-  const user = Store.getUser();
+async function renderAdminPage() {
+  const user = await Store.getUser();
   if (!user || !user.isAdmin) {
     Router.navigate('home');
     return;
@@ -18,7 +18,7 @@ function renderAdminPage() {
   // Questions State
   let currentBank = 'gk';
   
-  function renderLayout() {
+  async function renderLayout() {
     let html = `
       <div class="page-container">
         ${Components.pageHeader('प्रशासन कक्ष (Admin Panel)')}
@@ -37,26 +37,26 @@ function renderAdminPage() {
     `;
     container.innerHTML = html;
     
-    document.getElementById('tab-nav-questions').onclick = () => { currentTab = 'questions'; renderLayout(); };
-    document.getElementById('tab-nav-passes').onclick = () => { currentTab = 'passes'; renderLayout(); };
-    document.getElementById('tab-nav-courses').onclick = () => { currentTab = 'courses'; renderLayout(); };
-    document.getElementById('tab-nav-users').onclick = () => { currentTab = 'users'; renderLayout(); };
-    document.getElementById('tab-nav-payments').onclick = () => { currentTab = 'payments'; renderLayout(); };
-    document.getElementById('tab-nav-ai').onclick = () => { currentTab = 'ai'; renderLayout(); };
+    document.getElementById('tab-nav-questions').onclick = async () => { currentTab = 'questions'; await renderLayout(); };
+    document.getElementById('tab-nav-passes').onclick = async () => { currentTab = 'passes'; await renderLayout(); };
+    document.getElementById('tab-nav-courses').onclick = async () => { currentTab = 'courses'; await renderLayout(); };
+    document.getElementById('tab-nav-users').onclick = async () => { currentTab = 'users'; await renderLayout(); };
+    document.getElementById('tab-nav-payments').onclick = async () => { currentTab = 'payments'; await renderLayout(); };
+    document.getElementById('tab-nav-ai').onclick = async () => { currentTab = 'ai'; await renderLayout(); };
     
     const content = document.getElementById('admin-tab-content');
-    if (currentTab === 'questions') renderQuestions(content);
-    else if (currentTab === 'passes') renderPasses(content);
-    else if (currentTab === 'courses') renderCourses(content);
-    else if (currentTab === 'users') renderUsers(content);
-    else if (currentTab === 'payments') renderPayments(content);
-    else if (currentTab === 'ai') renderAISettings(content);
+    if (currentTab === 'questions') await renderQuestions(content);
+    else if (currentTab === 'passes') await renderPasses(content);
+    else if (currentTab === 'courses') await renderCourses(content);
+    else if (currentTab === 'users') await renderUsers(content);
+    else if (currentTab === 'payments') await renderPayments(content);
+    else if (currentTab === 'ai') await renderAISettings(content);
   }
 
   // ── Questions Tab ── //
-  function renderQuestions(parent) {
+  async function renderQuestions(parent) {
     const questions = currentBank === 'gk' ? QUESTIONS_GK : QUESTIONS_CUET;
-    const customQuestions = Store.getCustomQuestions();
+    const customQuestions = await Store.getCustomQuestions();
     
     let html = `
       <div class="tabs" style="display:flex; gap:10px; margin-bottom:20px;">
@@ -96,7 +96,7 @@ function renderAdminPage() {
             ${isCustom ? '<span style="color:var(--primary); font-weight:bold; margin-left:10px;">[Customized]</span>' : ''}
           </div>
           <div style="font-weight:bold; margin-bottom:10px;">${q.q}</div>
-          <div style="color:var(--success); margin-bottom:10px;">उत्तर: ${q.a}</div>
+          <div style="color:var(--success); margin-bottom:10px;">उत्तर: ${q.a ? q.a : '[सुरक्षित (Secure in DB)]'}</div>
           <div style="display:flex; gap:10px;">
             <button class="btn btn-sm btn-outline btn-edit-q" data-id="${q.id}">Edit</button>
             ${isCustom ? `<button class="btn btn-sm btn-outline btn-delete-q" style="color:var(--error); border-color:var(--error)" data-id="${q.id}">Delete</button>` : ''}
@@ -108,8 +108,8 @@ function renderAdminPage() {
     html += `</div>`;
     parent.innerHTML = html;
 
-    document.getElementById('tab-gk').onclick = () => { currentBank = 'gk'; renderQuestions(parent); };
-    document.getElementById('tab-cuet').onclick = () => { currentBank = 'cuet'; renderQuestions(parent); };
+    document.getElementById('tab-gk').onclick = async () => { currentBank = 'gk'; await renderQuestions(parent); };
+    document.getElementById('tab-cuet').onclick = async () => { currentBank = 'cuet'; await renderQuestions(parent); };
     document.getElementById('btn-add-q').onclick = () => renderQuestionForm(null);
     
     document.querySelectorAll('.btn-edit-q').forEach(btn => {
@@ -121,12 +121,12 @@ function renderAdminPage() {
     });
 
     document.querySelectorAll('.btn-delete-q').forEach(btn => {
-      btn.onclick = (e) => {
+      btn.onclick = async (e) => {
         const id = e.target.dataset.id;
         if(confirm("क्या आप इस प्रश्न को हटाना चाहते हैं? (Are you sure you want to delete this custom question?)")) {
-          Store.deleteCustomQuestion(id);
-          Data.init();
-          renderQuestions(parent);
+          await Store.deleteCustomQuestion(id);
+          await Data.init();
+          await renderQuestions(parent);
         }
       };
     });
@@ -138,7 +138,7 @@ function renderAdminPage() {
         const file = e.target.files[0];
         if (!file) return;
 
-        const apiKey = Store.getAiKey();
+        const apiKey = await Store.getAiKey();
         if (!apiKey) {
           Components.showToast('Please save your Gemini API Key in AI Settings first!', 'error');
           return;
@@ -197,8 +197,7 @@ function renderAdminPage() {
             throw new Error('No valid questions found in PDF.');
           }
 
-          let addedCount = 0;
-          extractedQuestions.forEach(eq => {
+          for (const eq of extractedQuestions) {
             if (eq.q && Array.isArray(eq.opts) && eq.opts.length >= 2 && eq.a) {
               const newQ = {
                 id: `${currentBank}_custom_${Date.now()}_${Math.floor(Math.random()*1000)}`,
@@ -209,14 +208,14 @@ function renderAdminPage() {
                 cat: currentBank === 'gk' ? 'general' : undefined,
                 unit: currentBank === 'cuet' ? 'shabdaroop' : undefined
               };
-              Store.saveCustomQuestion(newQ);
+              await Store.saveCustomQuestion(newQ);
               addedCount++;
             }
-          });
+          }
 
-          Data.init();
+          await Data.init();
           Components.showToast(`Success! Extracted ${addedCount} questions.`, 'success');
-          renderQuestions(parent);
+          await renderQuestions(parent);
           
         } catch (error) {
           console.error('PDF Extraction Error:', error);
@@ -275,9 +274,9 @@ function renderAdminPage() {
     const parent = document.getElementById('admin-tab-content');
     parent.innerHTML = html;
 
-    document.getElementById('btn-cancel-frm').onclick = () => renderQuestions(parent);
+    document.getElementById('btn-cancel-frm').onclick = async () => await renderQuestions(parent);
     
-    document.getElementById('btn-save-frm').onclick = () => {
+    document.getElementById('btn-save-frm').onclick = async () => {
       const formBank = document.getElementById('frm-bank').value;
       const formCat = document.getElementById('frm-cat').value;
       const formQ = document.getElementById('frm-q').value;
@@ -304,10 +303,10 @@ function renderAdminPage() {
       if(formBank === 'gk') newQ.cat = formCat || 'general';
       else newQ.unit = formCat || 'shabdaroop';
       
-      Store.saveCustomQuestion(newQ);
-      Data.init();
+      await Store.saveCustomQuestion(newQ);
+      await Data.init();
       Components.showToast('Question saved successfully!', 'success');
-      renderQuestions(parent);
+      await renderQuestions(parent);
     };
   }
 
@@ -319,8 +318,8 @@ function renderAdminPage() {
     { id: 'yearly', title: 'वार्षिक पास', validity: '365 दिन की वैधता', price: 299, oldPrice: 1196, recommended: true, discount: '75% छूट' }
   ];
   
-  function renderPasses(parent) {
-    let passes = Store.getPasses() || defaultPasses;
+  async function renderPasses(parent) {
+    let passes = (await Store.getPasses()) || defaultPasses;
     
     let html = `
       <div style="display:flex;flex-direction:column;gap:15px;">
@@ -347,7 +346,7 @@ function renderAdminPage() {
     `;
     parent.innerHTML = html;
     
-    document.getElementById('btn-save-passes').onclick = () => {
+    document.getElementById('btn-save-passes').onclick = async () => {
       let updated = passes.map((p, idx) => {
         return {
           ...p,
@@ -356,9 +355,9 @@ function renderAdminPage() {
           validity: document.getElementById(`pass-val-${idx}`).value
         };
       });
-      Store.savePasses(updated);
+      await Store.savePasses(updated);
       Components.showToast('Passes updated!', 'success');
-      renderPasses(parent);
+      await renderPasses(parent);
     };
   }
 
@@ -389,8 +388,8 @@ function renderAdminPage() {
     }
   ];
 
-  function renderCourses(parent) {
-    let courses = Store.getCourses() || defaultCourses;
+  async function renderCourses(parent) {
+    let courses = (await Store.getCourses()) || defaultCourses;
     
     let html = `
       <div style="display:flex;flex-direction:column;gap:15px;">
@@ -432,45 +431,45 @@ function renderAdminPage() {
     parent.innerHTML = html;
     
     // -- Bind Add/Remove Events --
-    document.getElementById('btn-add-module').onclick = () => {
+    document.getElementById('btn-add-module').onclick = async () => {
       courses.push({ module: 'नया खण्ड (New Module)', lessons: [] });
-      Store.saveCourses(courses);
-      renderCourses(parent);
+      await Store.saveCourses(courses);
+      await renderCourses(parent);
     };
 
     document.querySelectorAll('.btn-remove-module').forEach(btn => {
-      btn.onclick = (e) => {
+      btn.onclick = async (e) => {
         if(confirm("Remove this entire module?")) {
           const mIdx = e.target.dataset.midx;
           courses.splice(mIdx, 1);
-          Store.saveCourses(courses);
-          renderCourses(parent);
+          await Store.saveCourses(courses);
+          await renderCourses(parent);
         }
       };
     });
 
     document.querySelectorAll('.btn-add-lesson').forEach(btn => {
-      btn.onclick = (e) => {
+      btn.onclick = async (e) => {
         const mIdx = e.target.dataset.midx;
         courses[mIdx].lessons.push({ title: 'नया पाठ (New Lesson)', duration: '00:00', isFree: false, video: '' });
-        Store.saveCourses(courses);
-        renderCourses(parent);
+        await Store.saveCourses(courses);
+        await renderCourses(parent);
       };
     });
 
     document.querySelectorAll('.btn-remove-lesson').forEach(btn => {
-      btn.onclick = (e) => {
+      btn.onclick = async (e) => {
         if(confirm("Remove this lesson?")) {
           const mIdx = e.target.dataset.midx;
           const lIdx = e.target.dataset.lidx;
           courses[mIdx].lessons.splice(lIdx, 1);
-          Store.saveCourses(courses);
-          renderCourses(parent);
+          await Store.saveCourses(courses);
+          await renderCourses(parent);
         }
       };
     });
     
-    document.getElementById('btn-save-courses').onclick = () => {
+    document.getElementById('btn-save-courses').onclick = async () => {
       let updated = courses.map((mod, mIdx) => {
         return {
           module: document.getElementById(`mod-title-${mIdx}`).value,
@@ -481,15 +480,15 @@ function renderAdminPage() {
           }))
         };
       });
-      Store.saveCourses(updated);
+      await Store.saveCourses(updated);
       Components.showToast('Courses updated!', 'success');
-      renderCourses(parent);
+      await renderCourses(parent);
     };
   }
 
   // ── User Stats Tab ── //
-  function renderUsers(parent) {
-    const users = Store.getUsers();
+  async function renderUsers(parent) {
+    const users = await Store.getUsers();
     
     let html = `
       <div style="display:flex;flex-direction:column;gap:15px;">
@@ -535,19 +534,19 @@ function renderAdminPage() {
     parent.innerHTML = html;
 
     document.querySelectorAll('.btn-delete-user').forEach(btn => {
-      btn.onclick = (e) => {
+      btn.onclick = async (e) => {
         if(confirm("Are you sure you want to permanently delete this user?")) {
-          Store.deleteUser(e.target.dataset.id);
+          await Store.deleteUser(e.target.dataset.id);
           Components.showToast('User deleted', 'info');
-          renderUsers(parent);
+          await renderUsers(parent);
         }
       };
     });
   }
 
   // ── Payment Requests Tab ── //
-  function renderPayments(parent) {
-    const payments = Store.getPendingPayments().sort((a, b) => b.timestamp - a.timestamp);
+  async function renderPayments(parent) {
+    const payments = (await Store.getPendingPayments()).sort((a, b) => b.timestamp - a.timestamp);
     
     let html = `
       <div style="display:flex;flex-direction:column;gap:15px;">
@@ -593,50 +592,50 @@ function renderAdminPage() {
     parent.innerHTML = html;
 
     document.querySelectorAll('.btn-approve-payment').forEach(btn => {
-      btn.onclick = (e) => {
+      btn.onclick = async (e) => {
         const id = e.target.dataset.id;
         const userId = e.target.dataset.userid;
         const tier = e.target.dataset.tier;
         
         if (confirm('Are you sure you want to approve this payment and grant Pro access?')) {
-          Store.updatePendingPaymentStatus(id, 'approved');
+          await Store.updatePendingPaymentStatus(id, 'approved');
           
           // Update the user's profile in the registry
-          const allUsers = Store.getUsers();
+          const allUsers = await Store.getUsers();
           const uIdx = allUsers.findIndex(u => u.id === userId);
           if (uIdx >= 0) {
             allUsers[uIdx].isPro = true;
             allUsers[uIdx].passTier = tier;
-            Store.set('all_users', allUsers);
+            await Store.set('all_users', allUsers);
             
             // If the user being approved is the currently logged-in user (e.g. testing)
-            const currentUser = Store.getUser();
+            const currentUser = await Store.getUser();
             if (currentUser && currentUser.id === userId) {
-              Store.updateProfile({ isPro: true, passTier: tier });
+              await Store.updateProfile({ isPro: true, passTier: tier });
             }
             
             Components.showToast('Payment Approved and Pass Granted!', 'success');
-            renderPayments(parent);
+            await renderPayments(parent);
           }
         }
       };
     });
 
     document.querySelectorAll('.btn-reject-payment').forEach(btn => {
-      btn.onclick = (e) => {
+      btn.onclick = async (e) => {
         const id = e.target.dataset.id;
         if (confirm('Are you sure you want to reject this payment request?')) {
-          Store.updatePendingPaymentStatus(id, 'rejected');
+          await Store.updatePendingPaymentStatus(id, 'rejected');
           Components.showToast('Payment Rejected.', 'info');
-          renderPayments(parent);
+          await renderPayments(parent);
         }
       };
     });
   }
 
   // ── AI Settings Tab ── //
-  function renderAISettings(parent) {
-    const currentKey = Store.getAiKey() || '';
+  async function renderAISettings(parent) {
+    const currentKey = (await Store.getAiKey()) || '';
     
     let html = `
       <div style="display:flex;flex-direction:column;gap:15px;">
@@ -660,13 +659,13 @@ function renderAdminPage() {
     `;
     parent.innerHTML = html;
 
-    document.getElementById('btn-save-ai-key').onclick = () => {
+    document.getElementById('btn-save-ai-key').onclick = async () => {
       const key = document.getElementById('admin-ai-key').value.trim();
-      Store.saveAiKey(key);
+      await Store.saveAiKey(key);
       Components.showToast('AI API Key Saved successfully!', 'success');
     };
   }
 
   // Initial render
-  renderLayout();
+  await renderLayout();
 }

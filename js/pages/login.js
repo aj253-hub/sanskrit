@@ -118,13 +118,13 @@ function selectGoal(btn) {
   _selectedGoal = btn.dataset.goal;
 }
 
-function handleLogin(e) {
+async function handleLogin(e) {
   e.preventDefault();
   const email = document.getElementById('login-email').value.trim().toLowerCase();
   const password = document.getElementById('login-password').value;
   const errorEl = document.getElementById('login-error');
   
-  const result = Store.loginUser(email, password);
+  const result = await Store.loginUser(email, password);
   if (result.ok) {
     _refreshAppShell();
     if (result.user.isAdmin) {
@@ -139,16 +139,16 @@ function handleLogin(e) {
   }
 }
 
-function handleSignup(e) {
+async function handleSignup(e) {
   e.preventDefault();
   const name = document.getElementById('signup-name').value.trim();
   const email = document.getElementById('signup-email').value.trim().toLowerCase();
   const password = document.getElementById('signup-password').value;
   const errorEl = document.getElementById('signup-error');
   
-  const result = Store.registerUser(name, email, password);
+  const result = await Store.registerUser(name, email, password);
   if (result.ok) {
-    Store.updateProfile({ goal: _selectedGoal });
+    await Store.updateProfile({ goal: _selectedGoal });
     _refreshAppShell();
     Components.showToast('खाता सफलतापूर्वक बना! 🎉', 'success');
     Router.navigate('home');
@@ -158,8 +158,8 @@ function handleSignup(e) {
   }
 }
 
-function handleGuestLogin() {
-  const result = Store.registerUser('अतिथि', `guest_${Date.now()}@sanskrit.app`, 'guest1234');
+async function handleGuestLogin() {
+  const result = await Store.registerUser('अतिथि', `guest_${Date.now()}@sanskrit.app`, 'guest1234');
   if (result.ok) {
     _refreshAppShell();
     Components.showToast('अतिथि देवो भव 🙏', 'success');

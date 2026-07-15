@@ -2,9 +2,9 @@
    संस्कृत सेतु — Bookmarks Page
    ============================================================ */
 
-function renderBookmarksPage() {
+async function renderBookmarksPage() {
   const container = document.getElementById('app-content');
-  const bookmarks = Store.getBookmarks();
+  const bookmarks = await Store.getBookmarks();
   const items = bookmarks.map(id => QUESTION_MAP[id]).filter(Boolean);
 
   // Group by category
@@ -52,14 +52,14 @@ function renderBookmarksPage() {
   `;
 }
 
-function removeBookmark(qid) {
-  Store.toggleBookmark(qid);
+async function removeBookmark(qid) {
+  await Store.toggleBookmark(qid);
   Components.showToast('बुकमार्क हटाया', 'info');
-  renderBookmarksPage();
+  await renderBookmarksPage();
 }
 
-function practiceBookmarks() {
-  const bookmarks = Store.getBookmarks();
+async function practiceBookmarks() {
+  const bookmarks = await Store.getBookmarks();
   const deck = bookmarks.map(id => QUESTION_MAP[id]).filter(Boolean);
   if (deck.length === 0) {
     Components.showToast('कोई बुकमार्क नहीं', 'info');

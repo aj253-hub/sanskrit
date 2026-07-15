@@ -4,9 +4,9 @@
 
 let _editingNote = null;
 
-function renderNotesPage() {
+async function renderNotesPage() {
   const container = document.getElementById('app-content');
-  const notes = Store.getNotes();
+  const notes = await Store.getNotes();
 
   if (_editingNote) {
     _renderNoteEditor(container);
@@ -81,18 +81,18 @@ function _renderNoteEditor(container) {
   }
 }
 
-function createNewNote() {
+async function createNewNote() {
   _editingNote = { title: '', content: '', subject: '' };
-  renderNotesPage();
+  await renderNotesPage();
 }
 
-function editNote(id) {
-  const notes = Store.getNotes();
+async function editNote(id) {
+  const notes = await Store.getNotes();
   _editingNote = { ...notes.find(n => n.id === id) };
-  renderNotesPage();
+  await renderNotesPage();
 }
 
-function saveCurrentNote() {
+async function saveCurrentNote() {
   if (!_editingNote) return;
   
   const title = document.getElementById('note-title')?.value.trim() || '';
@@ -104,7 +104,7 @@ function saveCurrentNote() {
     return;
   }
   
-  Store.saveNote({
+  await Store.saveNote({
     ...(_editingNote.id ? { id: _editingNote.id } : {}),
     title: title || 'बिना शीर्षक',
     content,
@@ -113,20 +113,20 @@ function saveCurrentNote() {
   
   Components.showToast('नोट सहेजा गया ✅', 'success');
   _editingNote = null;
-  renderNotesPage();
+  await renderNotesPage();
 }
 
 function deleteCurrentNote() {
   if (!_editingNote?.id) return;
-  Components.showConfirm('नोट हटाएँ?', 'यह कार्य पूर्ववत नहीं किया जा सकता।', () => {
-    Store.deleteNote(_editingNote.id);
+  Components.showConfirm('नोट हटाएँ?', 'यह कार्य पूर्ववत नहीं किया जा सकता।', async () => {
+    await Store.deleteNote(_editingNote.id);
     Components.showToast('नोट हटाया गया', 'info');
     _editingNote = null;
-    renderNotesPage();
+    await renderNotesPage();
   });
 }
 
-function closeNoteEditor() {
+async function closeNoteEditor() {
   _editingNote = null;
-  renderNotesPage();
+  await renderNotesPage();
 }

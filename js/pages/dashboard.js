@@ -2,12 +2,13 @@
    संस्कृत सेतु — Dashboard Page (तैयारी)
    ============================================================ */
 
-function renderDashboardPage() {
+async function renderDashboardPage() {
   const container = document.getElementById('app-content');
-  const profile = Store.getProfile();
-  const stats = Store.getStats();
-  const progress = Store.getProgress();
-  const todayStats = Store.getTodayStats();
+  const profile = await Store.getProfile();
+  const stats = await Store.getStats();
+  const progress = await Store.getProgress();
+  const todayStats = await Store.getTodayStats();
+  const bookmarks = await Store.getBookmarks();
   
   // Category-wise accuracy
   const catAccuracy = {};
@@ -108,7 +109,7 @@ function renderDashboardPage() {
           <span style="font-size:24px">⭐</span>
           <div style="flex:1">
             <div style="font-weight:var(--fw-semi)">बुकमार्क समीक्षा</div>
-            <div style="font-size:var(--fs-xs);color:var(--text-muted)">${Store.getBookmarks().length} प्रश्न सहेजे गए</div>
+            <div style="font-size:var(--fs-xs);color:var(--text-muted)">${bookmarks.length} प्रश्न सहेजे गए</div>
           </div>
           <span style="color:var(--text-muted)">→</span>
         </div>

@@ -1,0 +1,3 @@
+const supabaseUrl = 'https://bhdyayvydxwugzghwvrj.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoZHlheXZ5ZHh3dWd6Z2h3dnJqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxMTI5MDMsImV4cCI6MjA5OTY4ODkwM30.yl1bVW6XWueDf7N2pYF-YlpD4O-ef8kcvves9kL99YQ';
+const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);

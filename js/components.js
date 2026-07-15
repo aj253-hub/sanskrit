@@ -6,8 +6,8 @@
 const Components = {
 
   // ── Sidebar (Desktop & Mobile) ── //
-  renderSidebar() {
-    const user = Store.getUser();
+  async renderSidebar() {
+    const user = await Store.getUser();
     const isAdmin = user ? (user.isAdmin || false) : false;
     
     // Categorized like a large platform
@@ -61,8 +61,8 @@ const Components = {
   },
 
   // ── App Header (Top Nav) ── //
-  renderHeader() {
-    const user = Store.getUser();
+  async renderHeader() {
+    const user = await Store.getUser();
     const initials = user ? Utils.getInitials(user.name) : '?';
     const streak = user ? (user.streak || 0) : 0;
 

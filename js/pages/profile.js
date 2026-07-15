@@ -2,13 +2,16 @@
    संस्कृत सेतु — Profile Page
    ============================================================ */
 
-function renderProfilePage() {
+async function renderProfilePage() {
   const container = document.getElementById('app-content');
-  const profile = Store.getProfile();
-  const stats = Store.getStats();
-  const bookmarkCount = Store.getBookmarks().length;
-  const noteCount = Store.getNotes().length;
-  const wrongCount = Store.getWrongAnswers().length;
+  const profile = await Store.getProfile();
+  const stats = await Store.getStats();
+  const bookmarks = await Store.getBookmarks();
+  const notes = await Store.getNotes();
+  const wrongAnswers = await Store.getWrongAnswers();
+  const bookmarkCount = bookmarks.length;
+  const noteCount = notes.length;
+  const wrongCount = wrongAnswers.length;
 
   container.innerHTML = `
     <div class="page-container page-enter">
@@ -129,36 +132,37 @@ function renderProfilePage() {
   `;
 }
 
-function updateGoal(goal) {
-  Store.updateProfile({ goal });
+async function updateGoal(goal) {
+  await Store.updateProfile({ goal });
   Components.showToast(`लक्ष्य बदला: ${goal}`, 'success');
-  renderProfilePage();
+  await renderProfilePage();
 }
 
-function updateDailyGoal(value) {
-  Store.updateProfile({ dailyGoal: parseInt(value) });
+async function updateDailyGoal(value) {
+  await Store.updateProfile({ dailyGoal: parseInt(value) });
   Components.showToast('दैनिक लक्ष्य अपडेट किया', 'success');
 }
 
-function editProfileName() {
-  const name = prompt('नया नाम दर्ज करें:', Store.getProfile().name);
+async function editProfileName() {
+  const profile = await Store.getProfile();
+  const name = prompt('नया नाम दर्ज करें:', profile.name);
   if (name && name.trim()) {
-    Store.updateProfile({ name: name.trim() });
+    await Store.updateProfile({ name: name.trim() });
     Components.showToast('नाम अपडेट किया', 'success');
     // Update header avatar
     const headerEl = document.getElementById('app-header');
-    if (headerEl) headerEl.outerHTML = Components.renderHeader();
-    renderProfilePage();
+    if (headerEl) headerEl.outerHTML = await Components.renderHeader();
+    await renderProfilePage();
   }
 }
 
-function exportData() {
+async function exportData() {
   const data = {
-    profile: Store.getProfile(),
-    progress: Store.getProgress(),
-    bookmarks: Store.getBookmarks(),
-    notes: Store.getNotes(),
-    wrongAnswers: Store.getWrongAnswers(),
+    profile: await Store.getProfile(),
+    progress: await Store.getProgress(),
+    bookmarks: await Store.getBookmarks(),
+    notes: await Store.getNotes(),
+    wrongAnswers: await Store.getWrongAnswers(),
     exportDate: new Date().toISOString()
   };
   
@@ -173,8 +177,8 @@ function exportData() {
 }
 
 function handleLogout() {
-  Components.showConfirm('लॉग आउट?', 'क्या आप लॉग आउट करना चाहते हैं?', () => {
-    Store.logout();
+  Components.showConfirm('लॉग आउट?', 'क्या आप लॉग आउट करना चाहते हैं?', async () => {
+    await Store.logout();
     Router.navigate('login');
     Components.showToast('लॉग आउट हो गए', 'info');
   });

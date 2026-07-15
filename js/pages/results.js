@@ -2,7 +2,7 @@
    संस्कृत सेतु — Results Page
    ============================================================ */
 
-function renderResultsPage() {
+async function renderResultsPage() {
   const container = document.getElementById('app-content');
   
   if (!_quizState) {
@@ -22,6 +22,8 @@ function renderResultsPage() {
   else if (pct >= 60) { verdict = 'साधु प्रयत्नः!'; verdictIcon = '👍'; }
   else if (pct >= 40) { verdict = 'ठीक है, और प्रयास करें'; verdictIcon = '💪'; }
   else { verdict = 'पुनः अभ्यासः आवश्यकः'; verdictIcon = '📖'; }
+
+  const bookmarks = await Store.getBookmarks();
 
   container.innerHTML = `
     <div class="page-container page-enter">
@@ -52,7 +54,7 @@ function renderResultsPage() {
       
       <div class="result-review-list stagger-children">
         ${s.answers.map((a, i) => {
-          const isBookmarked = Store.isBookmarked(a.q.id);
+          const isBookmarked = bookmarks.includes(a.q.id);
           return `
             <div class="review-item ${a.correct ? 'review-correct' : 'review-wrong'}">
               <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:var(--space-sm)">
@@ -79,10 +81,10 @@ function renderResultsPage() {
   `;
 }
 
-function toggleResultBookmark(qid) {
-  const added = Store.toggleBookmark(qid);
+async function toggleResultBookmark(qid) {
+  const added = await Store.toggleBookmark(qid);
   Components.showToast(added ? 'बुकमार्क जोड़ा ⭐' : 'बुकमार्क हटाया', added ? 'success' : 'info');
-  renderResultsPage();
+  await renderResultsPage();
 }
 
 function retryQuiz() {

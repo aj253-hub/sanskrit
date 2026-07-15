@@ -2,7 +2,7 @@
    संस्कृत सेतु — Course Dashboard Page
    ============================================================ */
 
-function renderCoursePage(params) {
+async function renderCoursePage(params) {
   const container = document.getElementById('app-content');
   const courseTitle = params.title || 'UGC NET - सांख्यकारिका';
   
@@ -10,7 +10,7 @@ function renderCoursePage(params) {
   const nav = document.getElementById('bottom-nav');
   if (nav) nav.style.display = 'none';
 
-  const user = Store.getUser();
+  const user = await Store.getUser();
   const hasPass = user?.isPro || false;
 
   const DEFAULT_CURRICULUM = [
@@ -39,7 +39,7 @@ function renderCoursePage(params) {
     }
   ];
 
-  const curriculum = Store.getCourses() || DEFAULT_CURRICULUM;
+  const curriculum = (await Store.getCourses()) || DEFAULT_CURRICULUM;
 
   window.playCourseVideo = function(videoUrl, title, isFree) {
     if (!isFree && !hasPass) {

@@ -2,10 +2,10 @@
    संस्कृत सेतु — Analytics Page (विस्तृत विश्लेषण)
    ============================================================ */
 
-function renderAnalyticsPage() {
+async function renderAnalyticsPage() {
   const container = document.getElementById('app-content');
-  const stats = Store.getStats();
-  const progress = Store.getProgress();
+  const stats = await Store.getStats();
+  const progress = await Store.getProgress();
   
   // Category accuracy data for bar chart
   const catData = [];

@@ -2,12 +2,12 @@
    संस्कृत सेतु — Home Page
    ============================================================ */
 
-function renderHomePage() {
+async function renderHomePage() {
   const container = document.getElementById('app-content');
-  const user = Store.getUser();
-  const profile = Store.getProfile();
-  const stats = Store.getStats();
-  const todayStats = Store.getTodayStats();
+  const user = await Store.getUser();
+  const profile = await Store.getProfile();
+  const stats = await Store.getStats();
+  const todayStats = await Store.getTodayStats();
   const streak = user.streak || 0;
   
   // Show header/sidebar
@@ -175,8 +175,9 @@ function startQuickPractice() {
   _startQuiz(deck, 'त्वरित अभ्यास', 'quick');
 }
 
-function startWrongAnswerPractice() {
-  const wrongIds = Store.getWrongAnswers().map(w => w.id);
+async function startWrongAnswerPractice() {
+  const wrongAnswers = await Store.getWrongAnswers();
+  const wrongIds = wrongAnswers.map(w => w.id);
   if (wrongIds.length === 0) {
     Components.showToast('कोई गलत उत्तर नहीं मिला! 🎉', 'info');
     return;

@@ -4,19 +4,19 @@
    ============================================================ */
 
 const App = {
-  init() {
+  async init() {
     // Build the app shell (Large Platform Layout)
     const appEl = document.getElementById('app');
     appEl.innerHTML = `
-      ${Components.renderSidebar()}
+      ${await Components.renderSidebar()}
       <div class="app-main">
-        ${Components.renderHeader()}
+        ${await Components.renderHeader()}
         <main class="app-content" id="app-content"></main>
       </div>
     `;
 
     // Initialize Data
-    Data.init();
+    await Data.init();
 
     // Register routes
     Router.register('login', () => renderLoginPage());
@@ -41,8 +41,8 @@ const App = {
     Router.init('app-content');
 
     // Update streak on load
-    if (Store.isLoggedIn()) {
-      Store.updateStreak();
+    if (await Store.isLoggedIn()) {
+      await Store.updateStreak();
     }
 
     // Initialize AI Assistant Chatbot

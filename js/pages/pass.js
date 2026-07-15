@@ -9,13 +9,13 @@ const DEFAULT_PASSES = [
   { id: 'yearly', title: 'वार्षिक पास', validity: '365 दिन की वैधता', price: 299, oldPrice: 1196, recommended: true, discount: '75% छूट', features: ['500+ CUET/Shastri/Acharya मॉक टेस्ट', 'पिछले 5 वर्षों के हल प्रश्न पत्र', 'विस्तृत अखिल भारतीय रैंक (AIR) विश्लेषण', 'ऑफ़लाइन देखने के लिए PDF नोट्स डाउनलोड'] }
 ];
 
-function renderPassPage() {
+async function renderPassPage() {
   const container = document.getElementById('app-content');
-  const user = Store.getUser();
+  const user = await Store.getUser();
   const hasPass = user?.isPro || false;
 
   // Fetch passes from Store or use defaults
-  const passes = Store.getPasses() || DEFAULT_PASSES;
+  const passes = (await Store.getPasses()) || DEFAULT_PASSES;
 
   // Show header/nav
   const header = document.getElementById('app-header');
@@ -122,8 +122,8 @@ function renderPassPage() {
   `;
 }
 
-function handleBuyPass(tier, amountInRupees) {
-  const user = Store.getUser();
+async function handleBuyPass(tier, amountInRupees) {
+  const user = await Store.getUser();
   if (!user) {
     Components.showToast('पास खरीदने के लिए पहले लॉगिन करें!', 'error');
     Router.navigate('login');
@@ -136,7 +136,8 @@ function handleBuyPass(tier, amountInRupees) {
   }
 
   // Check if they already have a pending payment
-  const pending = Store.getPendingPayments().find(p => p.userId === user.id && p.status === 'pending');
+  const pendingPayments = await Store.getPendingPayments();
+  const pending = pendingPayments.find(p => p.userId === user.id && p.status === 'pending');
   if (pending) {
     const waNumber = "919162040951"; 
     const waText = `नमस्ते Admin, मैंने Sanskrit Setu Pass (${pending.passTier}) के लिए भुगतान किया है।\n\nName: ${user.name}\nEmail: ${user.email}\nAmount: ₹${pending.amount}\nUTR Number: ${pending.utr}`;
@@ -200,14 +201,14 @@ function handleBuyPass(tier, amountInRupees) {
   `;
   document.body.insertAdjacentHTML('beforeend', modalHtml);
 
-  document.getElementById(`submit-payment-${modalId}`).onclick = () => {
+  document.getElementById(`submit-payment-${modalId}`).onclick = async () => {
     const utr = document.getElementById(`utr-input-${modalId}`).value.trim();
     if (!utr || utr.length < 8) {
       Components.showToast('कृपया सही UTR/Transaction ID दर्ज करें!', 'error');
       return;
     }
 
-    Store.savePendingPayment({
+    await Store.savePendingPayment({
       userId: user.id,
       userName: user.name,
       userEmail: user.email,

@@ -3,9 +3,9 @@
    ============================================================ */
 
 // ── Practice GK List ── //
-function renderPracticeGKPage() {
+async function renderPracticeGKPage() {
   const container = document.getElementById('app-content');
-  const progress = Store.getProgress();
+  const progress = await Store.getProgress();
 
   container.innerHTML = `
     <div class="page-container page-enter">
@@ -35,9 +35,9 @@ function renderPracticeGKPage() {
 }
 
 // ── Practice CUET List ── //
-function renderPracticeCUETPage() {
+async function renderPracticeCUETPage() {
   const container = document.getElementById('app-content');
-  const progress = Store.getProgress();
+  const progress = await Store.getProgress();
 
   container.innerHTML = `
     <div class="page-container page-enter">
@@ -111,7 +111,7 @@ function _startTimer() {
 }
 
 // ── Quiz View ── //
-function renderQuizPage(params) {
+async function renderQuizPage(params) {
   const container = document.getElementById('app-content');
   
   // If no active quiz, start one from params
@@ -149,7 +149,7 @@ function renderQuizPage(params) {
   const q = s.deck[s.idx];
   const pctDone = Math.round((s.idx / s.deck.length) * 100);
   const tag = q.bank === 'gk' ? (GK_CAT_LABELS[q.cat] || '') : (CUET_UNITS.find(u => u.id === q.unit)?.label || '');
-  const isBookmarked = Store.isBookmarked(q.id);
+  const isBookmarked = await Store.isBookmarked(q.id);
   const letters = ['अ', 'आ', 'इ', 'ई'];
 
   container.innerHTML = `
@@ -207,7 +207,7 @@ function renderQuizPage(params) {
   `;
 }
 
-function handleQuizChoice(opt) {
+async function handleQuizChoice(opt) {
   if (!_quizState || _quizState.locked) return;
   const s = _quizState;
   const q = s.deck[s.idx];
@@ -215,11 +215,18 @@ function handleQuizChoice(opt) {
   s.picked = opt;
   s.locked = true;
   
+  // Re-render immediately to show loading or locked state (optional, but good UX)
+  await renderQuizPage({});
+  
+  // Fetch correct answer from backend securely
+  const realAnswer = await Store.getCorrectAnswer(q.id);
+  q.a = realAnswer; // Temporarily store it so the UI can color correctly
+
   const isCorrect = Utils.checkAnswer(opt, q.a);
   if (isCorrect) {
     s.correct++;
   } else {
-    Store.addWrongAnswer(q);
+    await Store.addWrongAnswer(q);
   }
   
   s.answers.push({
@@ -229,31 +236,31 @@ function handleQuizChoice(opt) {
   });
 
   // Re-render
-  renderQuizPage({});
+  await renderQuizPage({});
 }
 
-function toggleQuizBookmark() {
+async function toggleQuizBookmark() {
   if (!_quizState) return;
   const q = _quizState.deck[_quizState.idx];
-  const added = Store.toggleBookmark(q.id);
+  const added = await Store.toggleBookmark(q.id);
   Components.showToast(added ? 'बुकमार्क जोड़ा ⭐' : 'बुकमार्क हटाया', added ? 'success' : 'info');
-  renderQuizPage({});
+  await renderQuizPage({});
 }
 
-function nextQuestion() {
+async function nextQuestion() {
   if (!_quizState) return;
   _quizState.idx++;
   _quizState.picked = null;
   _quizState.locked = false;
   
   if (_quizState.idx >= _quizState.deck.length) {
-    _finishQuiz();
+    await _finishQuiz();
   } else {
-    renderQuizPage({});
+    await renderQuizPage({});
   }
 }
 
-function _finishQuiz() {
+async function _finishQuiz() {
   if (_quizTimer) { clearInterval(_quizTimer); _quizTimer = null; }
   if (!_quizState) return;
   
@@ -261,20 +268,20 @@ function _finishQuiz() {
   const elapsed = Math.round((Date.now() - s.startTime) / 1000);
   
   // Save progress
-  Store.saveProgress(s.progressKey, {
+  await Store.saveProgress(s.progressKey, {
     score: s.correct,
     total: s.deck.length,
     label: s.label,
     time: elapsed
   });
   
-  Store.updateStreak();
+  await Store.updateStreak();
   
   Router.navigate('results');
 }
 
 function quitQuiz() {
-  Components.showConfirm('परीक्षा छोड़ें?', 'आपकी प्रगति सहेजी जाएगी।', () => {
-    _finishQuiz();
+  Components.showConfirm('परीक्षा छोड़ें?', 'आपकी प्रगति सहेजी जाएगी।', async () => {
+    await _finishQuiz();
   });
 }

@@ -3,9 +3,9 @@
    ============================================================ */
 
 // ── Practice NTA List (Unit-wise) ── //
-function renderPracticeNTAPage() {
+async function renderPracticeNTAPage() {
   const container = document.getElementById('app-content');
-  const progress = Store.getProgress();
+  const progress = await Store.getProgress();
 
   container.innerHTML = `
     <div class="page-container page-enter" style="padding-bottom: 100px;">
@@ -88,7 +88,7 @@ function _startNTAQuiz(deck, label, progressKey, totalSeconds = 10800) {
 }
 
 // ── NTA CBT Quiz View ── //
-function renderNTAQuizPage(params) {
+async function renderNTAQuizPage(params) {
   const container = document.getElementById('app-content');
   
   // Initialize if coming directly to the route with params
@@ -160,8 +160,8 @@ function renderNTAQuizPage(params) {
         <!-- Right Panel: Palette -->
         <div class="nta-palette-panel">
           <div class="nta-user-info">
-            <img src="${Store.getUser()?.avatar || 'assets/images/logo.jpeg'}" alt="User" style="width:50px;height:50px;border-radius:50%">
-            <div style="font-size:var(--fs-sm);font-weight:bold;">${Store.getUser()?.name || 'Candidate'}</div>
+            <img src="${(await Store.getUser())?.avatar || 'assets/images/logo.jpeg'}" alt="User" style="width:50px;height:50px;border-radius:50%">
+            <div style="font-size:var(--fs-sm);font-weight:bold;">${(await Store.getUser())?.name || 'Candidate'}</div>
           </div>
           
           <div class="nta-status-legend">
@@ -205,13 +205,13 @@ function _updateCurrentStatus(isAnswered, isMarked) {
   else s.statuses[s.idx] = 'not-answered';
 }
 
-function ntaSaveAndNext() {
+async function ntaSaveAndNext() {
   if (!_ntaState) return;
   const s = _ntaState;
   const hasAnswer = s.answers[s.idx] !== null;
   
   _updateCurrentStatus(hasAnswer, false);
-  ntaJumpToQuestion(s.idx + 1);
+  await ntaJumpToQuestion(s.idx + 1);
 }
 
 function ntaClearResponse() {
@@ -221,25 +221,25 @@ function ntaClearResponse() {
   document.querySelectorAll('input[name="nta-opt"]').forEach(el => el.checked = false);
 }
 
-function ntaSaveAndMark() {
+async function ntaSaveAndMark() {
   if (!_ntaState) return;
   const s = _ntaState;
   const hasAnswer = s.answers[s.idx] !== null;
   
   _updateCurrentStatus(hasAnswer, true);
-  ntaJumpToQuestion(s.idx + 1);
+  await ntaJumpToQuestion(s.idx + 1);
 }
 
-function ntaMarkAndNext() {
+async function ntaMarkAndNext() {
   if (!_ntaState) return;
   const s = _ntaState;
   const hasAnswer = s.answers[s.idx] !== null;
   
   _updateCurrentStatus(hasAnswer, true);
-  ntaJumpToQuestion(s.idx + 1);
+  await ntaJumpToQuestion(s.idx + 1);
 }
 
-function ntaJumpToQuestion(targetIdx) {
+async function ntaJumpToQuestion(targetIdx) {
   if (!_ntaState) return;
   const s = _ntaState;
   
@@ -250,7 +250,7 @@ function ntaJumpToQuestion(targetIdx) {
 
   // Handle bounds
   if (targetIdx >= s.deck.length) {
-    renderNTAQuizPage({});
+    await renderNTAQuizPage({});
     return;
   }
   
@@ -259,16 +259,16 @@ function ntaJumpToQuestion(targetIdx) {
     s.statuses[s.idx] = 'not-answered';
   }
   
-  renderNTAQuizPage({});
+  await renderNTAQuizPage({});
 }
 
 function ntaConfirmSubmit() {
-  Components.showConfirm('Submit Exam?', 'Are you sure you want to submit the exam? You will not be able to change your answers.', () => {
-    _finishNTAQuiz();
+  Components.showConfirm('Submit Exam?', 'Are you sure you want to submit the exam? You will not be able to change your answers.', async () => {
+    await _finishNTAQuiz();
   });
 }
 
-function _finishNTAQuiz() {
+async function _finishNTAQuiz() {
   if (_ntaTimer) { clearInterval(_ntaTimer); _ntaTimer = null; }
   if (!_ntaState) return;
   
@@ -276,26 +276,38 @@ function _finishNTAQuiz() {
   const elapsed = Math.round((Date.now() - s.startTime) / 1000);
   
   // Calculate NTA scoring (+2 for correct, 0 for incorrect/unanswered)
+  
+  const container = document.getElementById('app-content');
+  if(container) container.innerHTML = '<div class="page-container page-enter" style="text-align:center;padding-top:100px;"><h2>Submitting Exam...</h2><p>Please wait while we evaluate your answers securely.</p></div>';
+
   let correct = 0;
-  s.deck.forEach((q, i) => {
-    if (s.answers[i] !== null && Utils.checkAnswer(s.answers[i], q.a)) {
-      correct++;
-    } else if (s.answers[i] !== null && !Utils.checkAnswer(s.answers[i], q.a)) {
-      Store.addWrongAnswer(q);
+  
+  const gradingPromises = s.deck.map(async (q, i) => {
+    if (s.answers[i] === null) return 0;
+    const realAnswer = await Store.getCorrectAnswer(q.id);
+    if (Utils.checkAnswer(s.answers[i], realAnswer)) {
+      return 1;
+    } else {
+      q.a = realAnswer; // For any UI that might need it later
+      await Store.addWrongAnswer(q);
+      return 0;
     }
   });
+
+  const results = await Promise.all(gradingPromises);
+  correct = results.reduce((sum, val) => sum + val, 0);
 
   const score = correct * 2;
   const total = s.deck.length * 2;
   
   // Save progress
-  Store.saveProgress(s.progressKey, {
+  await Store.saveProgress(s.progressKey, {
     score: score,
     total: total,
     label: s.label,
     time: elapsed
   });
   
-  Store.updateStreak();
+  await Store.updateStreak();
   Router.navigate('results');
 }

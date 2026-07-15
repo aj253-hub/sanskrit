@@ -2,7 +2,7 @@
    संस्कृत सेतु — Study Materials / Notes Page
    ============================================================ */
 
-function renderMaterialsPage() {
+async function renderMaterialsPage() {
   const container = document.getElementById('app-content');
   
   // Show header/nav
@@ -19,7 +19,7 @@ function renderMaterialsPage() {
     { title: 'सामान्य ज्ञान - दर्शन शास्त्र सारांश', size: '8.4 MB', type: 'PDF', isPro: false },
   ];
 
-  const user = Store.getUser();
+  const user = await Store.getUser();
   const hasPass = user?.isPro || false;
 
   container.innerHTML = `
@@ -74,8 +74,8 @@ function renderMaterialsPage() {
   `;
 }
 
-function handleDownloadMaterial(isPro) {
-  const user = Store.getUser();
+async function handleDownloadMaterial(isPro) {
+  const user = await Store.getUser();
   if (isPro && (!user || !user.isPro)) {
     Components.showConfirm('प्रो पास आवश्यक', 'यह सामग्री केवल संस्कृत सेतु पास सदस्यों के लिए उपलब्ध है। क्या आप पास खरीदना चाहते हैं?', () => {
       Router.navigate('pass');

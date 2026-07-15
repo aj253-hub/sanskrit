@@ -2,9 +2,9 @@
    संस्कृत सेतु — Exams Page (Categorized Taxonomy)
    ============================================================ */
 
-function renderExamsPage() {
+async function renderExamsPage() {
   const container = document.getElementById('app-content');
-  const user = Store.getUser();
+  const user = await Store.getUser();
   const hasPass = user?.isPro || false;
 
   const header = document.getElementById('app-header');
@@ -193,8 +193,8 @@ function renderExamsPage() {
   `;
 }
 
-function startMockTest(isPro = false) {
-  const user = Store.getUser();
+async function startMockTest(isPro = false) {
+  const user = await Store.getUser();
   if (isPro && (!user || !user.isPro)) {
     Components.showConfirm('प्रो पास आवश्यक', 'यह टेस्ट केवल संस्कृत सेतु पास सदस्यों के लिए उपलब्ध है। क्या आप पास खरीदना चाहते हैं?', () => {
       Router.navigate('pass');

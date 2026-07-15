@@ -53,16 +53,17 @@ const Router = {
     return params;
   },
 
-  _onHashChange() {
+  async _onHashChange() {
     const hash = window.location.hash.slice(1) || 'login';
     const [path] = hash.split('?');
     
     // Auth guard
-    if (path !== 'login' && !Store.isLoggedIn()) {
+    const isLoggedIn = await Store.isLoggedIn();
+    if (path !== 'login' && !isLoggedIn) {
       this.navigate('login');
       return;
     }
-    if (path === 'login' && Store.isLoggedIn()) {
+    if (path === 'login' && isLoggedIn) {
       this.navigate('home');
       return;
     }
@@ -77,9 +78,9 @@ const Router = {
       this._container.style.opacity = '0';
       this._container.style.transform = 'translateY(8px)';
       
-      setTimeout(() => {
+      setTimeout(async () => {
         this._container.innerHTML = '';
-        handler(this.getParams());
+        await handler(this.getParams());
         this._container.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
         this._container.style.opacity = '1';
         this._container.style.transform = 'translateY(0)';
