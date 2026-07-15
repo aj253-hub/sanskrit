@@ -39,7 +39,7 @@ function renderPracticeNTAPage() {
             <div style="font-size:var(--fs-md);font-weight:var(--fw-bold);color:var(--text-primary);margin-bottom:4px">
               UGC NET Paper 2 (Sanskrit)
             </div>
-            <div style="font-size:12px;color:var(--text-muted)">150 प्रश्न · 180 मिनट · NTA CBT Pattern</div>
+            <div style="font-size:12px;color:var(--text-muted)">${QUESTIONS_NTA.length} प्रश्न · 180 मिनट · NTA CBT Pattern</div>
           </div>
           <button class="btn btn-primary" onclick="Router.navigate('quiz-nta', {test:0})">
             Start Mock

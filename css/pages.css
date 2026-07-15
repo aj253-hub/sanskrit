@@ -102,63 +102,42 @@
   background: rgba(201, 162, 39, 0.15);
 }
 
-/* ── Home Page ── */
-.home-hero {
+/* ── Home Dashboard Page ── */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-xl);
+  animation: fadeSlideUp 0.5s ease;
+}
+
+@media (min-width: 1024px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr 340px;
+  }
+}
+
+.dashboard-main {
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-sidebar {
+  display: flex;
+  flex-direction: column;
+}
+
+.subhashitam-card {
   position: relative;
-  padding: var(--space-xl) 0;
-  animation: fadeIn 0.5s ease;
+  overflow: hidden;
 }
-.home-greeting {
-  font-size: var(--fs-sm);
-  color: var(--text-secondary);
-  margin-bottom: var(--space-xs);
-}
-.home-title {
-  font-family: var(--font-hindi);
-  font-size: var(--fs-2xl);
-  color: var(--text-primary);
-  margin-bottom: var(--space-sm);
-}
-.home-stats-row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-sm);
-  margin: var(--space-lg) 0;
-}
-.home-quick-actions {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-sm);
-  margin-top: var(--space-md);
-}
-.quick-action-card {
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-md);
-  cursor: pointer;
-  transition: all var(--duration-normal) var(--ease-out);
-  text-align: left;
-}
-.quick-action-card:hover {
-  border-color: var(--gold);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-glow);
-}
-.quick-action-card .qa-icon {
-  font-size: 28px;
-  margin-bottom: var(--space-sm);
-}
-.quick-action-card .qa-title {
-  font-weight: var(--fw-semi);
-  font-size: var(--fs-sm);
-  color: var(--text-primary);
-  margin-bottom: 2px;
-}
-.quick-action-card .qa-desc {
-  font-size: var(--fs-xs);
-  color: var(--text-muted);
+.subhashitam-card::before {
+  content: '🕉️';
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  font-size: 120px;
+  opacity: 0.05;
+  pointer-events: none;
 }
 
 /* ── Continue Learning Card ── */

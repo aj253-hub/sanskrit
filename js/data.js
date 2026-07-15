@@ -296,13 +296,8 @@ const Data = {
     }
     GK_TESTS = tests;
 
-    // ── Build NTA test sets (150 questions each) - using placeholder duplicates if short ── //
-    // Since we don't have 150 real NTA questions yet, we'll repeat existing for the mock test
-    const mockNtaDeck = [];
-    while (mockNtaDeck.length < 150) {
-       mockNtaDeck.push(...QUESTIONS_NTA);
-    }
-    NTA_TESTS = [Utils.shuffle(mockNtaDeck).slice(0, 150)];
+    // ── Build NTA test sets ── //
+    NTA_TESTS = [Utils.shuffle([...QUESTIONS_NTA])];
 
     // ── All questions combined ── //
     ALL_QUESTIONS = [...QUESTIONS_GK, ...QUESTIONS_CUET, ...QUESTIONS_NTA];

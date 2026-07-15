@@ -253,7 +253,7 @@ const Store = {
 
   // ── AI Settings ── //
   getAiKey() {
-    return this.get('ai_api_key', null);
+    return this.get('ai_api_key', '');
   },
 
   saveAiKey(key) {

@@ -5,8 +5,8 @@
 const AI = {
   _history: [],
   
-  // Replace with the actual REST API URL for Gemini
-  _apiUrl: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=',
+  // AI endpoint (should point to a backend route like Vercel serverless function)
+  _apiUrl: '/api/ai',
 
   init() {
     this._renderChatWindow();
@@ -78,25 +78,16 @@ const AI = {
   },
 
   async _handleUserMessage(text) {
-    const apiKey = Store.getAiKey ? Store.getAiKey() : null;
-    if (!apiKey) {
-      this._addMessage(text, 'user');
-      this._addMessage("कृपया व्यवस्थापक (Admin) से कहें कि वे Admin Panel में जाकर AI Settings में अपनी Google Gemini API Key सुरक्षित करें, ताकि मैं आपके प्रश्नों का उत्तर दे सकूँ।", 'bot');
-      return;
-    }
-
     this._addMessage(text, 'user');
     const typingId = this._addTypingIndicator();
     
     try {
       const prompt = `You are "Sanskrit Guru", an expert AI assistant for "Sanskrit Setu", an exam prep platform for CUET, Shastri, Acharya, and UGC NET. Answer the following question primarily in Hindi (with Sanskrit terms where appropriate). Be very concise, accurate, and encouraging. \n\nQuestion: ${text}`;
       
-      const response = await fetch(this._apiUrl + apiKey, {
+      const response = await fetch(this._apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }]
-        })
+        body: JSON.stringify({ prompt: prompt })
       });
 
       const data = await response.json();

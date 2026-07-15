@@ -5,60 +5,85 @@
 
 const Components = {
 
-  // ── App Header ── //
+  // ── Sidebar (Desktop & Mobile) ── //
+  renderSidebar() {
+    const user = Store.getUser();
+    const isAdmin = user ? (user.isAdmin || false) : false;
+    
+    // Categorized like a large platform
+    return `
+      <aside class="app-sidebar" id="app-sidebar">
+        <div class="sidebar-header">
+          <div class="header-brand" style="cursor:pointer" onclick="Router.navigate('home')">
+            <img src="assets/images/logo.jpeg" class="header-logo" alt="Logo">
+            <div>
+              <div class="brand-name text-saffron">संस्कृत सेतु</div>
+            </div>
+          </div>
+        </div>
+        <nav class="sidebar-nav">
+          <div class="nav-section">
+            <div class="nav-section-title">मुख्य</div>
+            <a href="javascript:void(0)" class="nav-item" onclick="Router.navigate('home')">🏠 डैशबोर्ड</a>
+            <a href="javascript:void(0)" class="nav-item" onclick="Router.navigate('profile')">👤 प्रोफ़ाइल</a>
+            <a href="javascript:void(0)" class="nav-item" onclick="Router.navigate('pass')">🎟️ प्रो-पास</a>
+          </div>
+          
+          <div class="nav-section">
+            <div class="nav-section-title">प्रतियोगी परीक्षा</div>
+            <a href="javascript:void(0)" class="nav-item" onclick="Router.navigate('exams')">🎓 NTA UGC NET</a>
+            <a href="javascript:void(0)" class="nav-item" onclick="Router.navigate('exams')">🏛️ CUET (UG/PG)</a>
+            <a href="javascript:void(0)" class="nav-item" onclick="Router.navigate('exams')">🏫 PGT/TGT (State)</a>
+          </div>
+          
+          <div class="nav-section">
+            <div class="nav-section-title">अध्ययन सामग्री</div>
+            <a href="javascript:void(0)" class="nav-item" onclick="Router.navigate('materials')">📚 ई-ग्रंथालय (Library)</a>
+            <a href="javascript:void(0)" class="nav-item" onclick="Router.navigate('materials')">📝 Previous Papers</a>
+            <a href="javascript:void(0)" class="nav-item" onclick="Router.navigate('materials')">📄 NCERT/SCERT Notes</a>
+          </div>
+          
+          <div class="nav-section">
+            <div class="nav-section-title">Sanskrit Tools</div>
+            <a href="javascript:void(0)" class="nav-item" onclick="Components.showToast('Vyakaran Tool Coming Soon!')">⚙️ Vyakaran Analyzer</a>
+            <a href="javascript:void(0)" class="nav-item" onclick="Components.showToast('Dictionary Coming Soon!')">📖 शब्दकोश (Dictionary)</a>
+          </div>
+          
+          ${isAdmin ? `
+          <div class="nav-section">
+            <div class="nav-section-title">Admin</div>
+            <a href="javascript:void(0)" class="nav-item" onclick="Router.navigate('admin')">👑 Dashboard</a>
+          </div>
+          ` : ''}
+        </nav>
+      </aside>
+    `;
+  },
+
+  // ── App Header (Top Nav) ── //
   renderHeader() {
     const user = Store.getUser();
     const initials = user ? Utils.getInitials(user.name) : '?';
     const streak = user ? (user.streak || 0) : 0;
-    const isAdmin = user ? (user.isAdmin || false) : false;
 
     return `
       <header class="app-header" id="app-header">
         <div class="header-inner">
-          <div class="header-brand" style="cursor:pointer" onclick="Router.navigate('home')">
-            <img src="assets/images/logo.jpeg" class="header-logo" alt="Logo">
-            <div>
-              <div class="brand-name">संस्कृत सेतु</div>
-              <div class="brand-sub">परीक्षा तैयारी मंच</div>
+          <div class="header-left">
+            <button class="menu-toggle btn btn-ghost" onclick="document.body.classList.toggle('sidebar-open')">☰</button>
+            <div class="search-bar-container">
+              <span class="search-icon">🔍</span>
+              <input type="text" class="search-input" placeholder="कोर्स, टेस्ट या नोट्स खोजें...">
             </div>
           </div>
           <div class="header-actions">
-            ${isAdmin ? `<button class="btn btn-outline btn-sm" style="border-color:var(--primary);color:var(--primary)" onclick="Router.navigate('admin')">Admin</button>` : ''}
+            <button class="btn btn-ghost" title="Translate">A/अ</button>
+            <button class="btn btn-ghost" title="Notifications">🔔</button>
             ${streak > 0 ? `<div class="streak-flame"><span class="flame-icon">🔥</span>${streak}</div>` : ''}
             <button class="header-avatar" onclick="Router.navigate('profile')" title="प्रोफ़ाइल">${initials}</button>
           </div>
         </div>
       </header>
-    `;
-  },
-
-  // ── Bottom Navigation ── //
-  renderBottomNav() {
-    const user = Store.getUser();
-    const isAdmin = user ? (user.isAdmin || false) : false;
-
-    const items = [
-      { page: 'home',      icon: '🏠', label: 'मुख्य' },
-      { page: 'exams',     icon: '📝', label: 'टेस्ट' },
-      { page: 'pass',      icon: '🎟️', label: 'पास' },
-      { page: 'profile',   icon: '👤', label: 'प्रोफ़ाइल' }
-    ];
-
-    if (isAdmin) {
-      items.push({ page: 'admin', icon: '👑', label: 'Admin' });
-    }
-
-    return `
-      <nav class="bottom-nav" id="bottom-nav">
-        <div class="nav-inner">
-          ${items.map(item => `
-            <button class="nav-item" data-page="${item.page}" onclick="Router.navigate('${item.page}')">
-              <span class="nav-icon">${item.icon}</span>
-              <span class="nav-label">${item.label}</span>
-            </button>
-          `).join('')}
-        </div>
-      </nav>
     `;
   },
 

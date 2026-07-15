@@ -1,0 +1,21 @@
+{
+  "name": "Sanskrit Setu",
+  "short_name": "Sanskrit Setu",
+  "description": "संस्कृत सेतु — CUET, Shastri, Acharya संस्कृत परीक्षाओं की सम्पूर्ण तैयारी का विश्वसनीय मंच।",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#0a0f1e",
+  "theme_color": "#0a0f1e",
+  "icons": [
+    {
+      "src": "assets/images/logo.jpeg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "assets/images/logo.jpeg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}

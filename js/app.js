@@ -5,12 +5,14 @@
 
 const App = {
   init() {
-    // Build the app shell
+    // Build the app shell (Large Platform Layout)
     const appEl = document.getElementById('app');
     appEl.innerHTML = `
-      ${Components.renderHeader()}
-      <main class="app-content" id="app-content"></main>
-      ${Components.renderBottomNav()}
+      ${Components.renderSidebar()}
+      <div class="app-main">
+        ${Components.renderHeader()}
+        <main class="app-content" id="app-content"></main>
+      </div>
     `;
 
     // Initialize Data
@@ -46,6 +48,13 @@ const App = {
     // Initialize AI Assistant Chatbot
     if (typeof AI !== 'undefined') {
       AI.init();
+    }
+
+    // Register Service Worker for PWA Support
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('Service Worker registered', reg))
+        .catch(err => console.error('Service Worker registration failed', err));
     }
 
     console.log('🕉️ संस्कृत सेतु initialized');
