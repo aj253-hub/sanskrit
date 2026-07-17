@@ -5,6 +5,10 @@
 async function renderDashboardPage() {
   const container = document.getElementById('app-content');
   const profile = await Store.getProfile();
+  if (!profile) {
+    Router.navigate('login');
+    return;
+  }
   const stats = await Store.getStats();
   const progress = await Store.getProgress();
   const todayStats = await Store.getTodayStats();

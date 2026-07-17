@@ -73,7 +73,13 @@ let _quizTimer = null;
 
 function _startQuiz(deck, label, progressKey, timed = false, totalSeconds = 0) {
   _quizState = {
-    deck: deck.map(q => ({ ...q, opts: Utils.shuffle([...q.opts]) })),
+    // Store correctAnswer (opts[0] of original) BEFORE shuffling options.
+    // This eliminates the need for any async answer-key fetch during the quiz
+    // and prevents the failure-mode where getCorrectAnswer() returns null/undefined.
+    deck: deck.map(q => {
+      const correctAnswer = q.opts[0]; // always opts[0] in source data
+      return { ...q, correctAnswer, opts: Utils.shuffle([...q.opts]) };
+    }),
     idx: 0,
     picked: null,
     locked: false,
@@ -180,7 +186,9 @@ async function renderQuizPage(params) {
           ${q.opts.map((opt, i) => {
             let cls = '';
             if (s.locked) {
-              if (Utils.checkAnswer(opt, q.a)) cls = 'correct';
+              // Use pre-stored correctAnswer (set before shuffle); fall back to q.a for custom questions
+              const correct = q.correctAnswer || q.a;
+              if (Utils.checkAnswer(opt, correct)) cls = 'correct';
               else if (opt === s.picked) cls = 'wrong';
               else cls = 'dimmed';
               cls += ' locked';
@@ -214,15 +222,16 @@ async function handleQuizChoice(opt) {
   
   s.picked = opt;
   s.locked = true;
-  
-  // Re-render immediately to show loading or locked state (optional, but good UX)
-  await renderQuizPage({});
-  
-  // Fetch correct answer from backend securely
-  const realAnswer = await Store.getCorrectAnswer(q.id);
-  q.a = realAnswer; // Temporarily store it so the UI can color correctly
 
-  const isCorrect = Utils.checkAnswer(opt, q.a);
+  // Use the correctAnswer stored before shuffle — no async network call needed.
+  // For custom questions that don't have correctAnswer set, fall back to getCorrectAnswer().
+  let correctAnswer = q.correctAnswer;
+  if (!correctAnswer) {
+    correctAnswer = await Store.getCorrectAnswer(q.id);
+    q.correctAnswer = correctAnswer; // cache it for the render
+  }
+
+  const isCorrect = Utils.checkAnswer(opt, correctAnswer);
   if (isCorrect) {
     s.correct++;
   } else {
@@ -235,7 +244,7 @@ async function handleQuizChoice(opt) {
     correct: isCorrect
   });
 
-  // Re-render
+  // Single render — correctAnswer is already set so colors show immediately
   await renderQuizPage({});
 }
 

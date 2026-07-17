@@ -179,7 +179,7 @@ async function exportData() {
 function handleLogout() {
   Components.showConfirm('लॉग आउट?', 'क्या आप लॉग आउट करना चाहते हैं?', async () => {
     await Store.logout();
-    Router.navigate('login');
-    Components.showToast('लॉग आउट हो गए', 'info');
+    window.location.hash = '#login';
+    window.location.reload();
   });
 }

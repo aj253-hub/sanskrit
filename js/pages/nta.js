@@ -56,7 +56,11 @@ let _ntaTimer = null;
 
 function _startNTAQuiz(deck, label, progressKey, totalSeconds = 10800) {
   _ntaState = {
-    deck: deck.map(q => ({ ...q, opts: Utils.shuffle([...q.opts]) })),
+    // Store correctAnswer (opts[0] of original) BEFORE shuffling options
+    deck: deck.map(q => {
+      const correctAnswer = q.opts[0];
+      return { ...q, correctAnswer, opts: Utils.shuffle([...q.opts]) };
+    }),
     idx: 0,
     answers: new Array(deck.length).fill(null), // null (unanswered), string (answered)
     statuses: new Array(deck.length).fill('not-visited'), // 'not-visited', 'not-answered', 'answered', 'marked', 'answered-marked'
@@ -284,11 +288,14 @@ async function _finishNTAQuiz() {
   
   const gradingPromises = s.deck.map(async (q, i) => {
     if (s.answers[i] === null) return 0;
-    const realAnswer = await Store.getCorrectAnswer(q.id);
-    if (Utils.checkAnswer(s.answers[i], realAnswer)) {
+    // Use correctAnswer stored before shuffle; fall back to getCorrectAnswer() for custom questions
+    let correctAnswer = q.correctAnswer;
+    if (!correctAnswer) {
+      correctAnswer = await Store.getCorrectAnswer(q.id);
+    }
+    if (Utils.checkAnswer(s.answers[i], correctAnswer)) {
       return 1;
     } else {
-      q.a = realAnswer; // For any UI that might need it later
       await Store.addWrongAnswer(q);
       return 0;
     }

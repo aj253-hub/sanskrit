@@ -36,8 +36,10 @@ function renderLoginPage() {
   // Hide header and nav for login page
   const header = document.getElementById('app-header');
   const nav = document.getElementById('bottom-nav');
+  const sidebar = document.getElementById('app-sidebar');
   if (header) header.style.display = 'none';
   if (nav) nav.style.display = 'none';
+  if (sidebar) sidebar.style.display = 'none';
 }
 
 function _loginFormHTML() {
@@ -146,24 +148,66 @@ async function handleSignup(e) {
   const password = document.getElementById('signup-password').value;
   const errorEl = document.getElementById('signup-error');
   
-  const result = await Store.registerUser(name, email, password);
-  if (result.ok) {
-    await Store.updateProfile({ goal: _selectedGoal });
-    _refreshAppShell();
-    Components.showToast('खाता सफलतापूर्वक बना! 🎉', 'success');
-    Router.navigate('home');
-  } else {
-    errorEl.textContent = result.error;
+  try {
+    const result = await Store.registerUser(name, email, password);
+    if (result.ok) {
+      const user = await Store.getUser();
+      if (!user) {
+         Components.showToast('खाता बन गया है! कृपया अपना ईमेल वेरीफाई करें।', 'info');
+         switchLoginTab('login');
+         return;
+      }
+      await Store.updateProfile({ goal: _selectedGoal });
+      _refreshAppShell();
+      Components.showToast('खाता सफलतापूर्वक बना! 🎉', 'success');
+      Router.navigate('home');
+    } else {
+      errorEl.textContent = result.error;
+      errorEl.style.display = 'block';
+    }
+  } catch (err) {
+    errorEl.textContent = err.message || 'Signup failed';
     errorEl.style.display = 'block';
   }
 }
 
 async function handleGuestLogin() {
-  const result = await Store.registerUser('अतिथि', `guest_${Date.now()}@sanskrit.app`, 'guest1234');
-  if (result.ok) {
-    _refreshAppShell();
-    Components.showToast('अतिथि देवो भव 🙏', 'success');
-    Router.navigate('home');
+  const errorEl = document.getElementById('login-error');
+  try {
+    const guestEmail = 'guest_demo@sanskrit.app';
+    const guestPass = 'guest1234';
+    
+    // Try to login first to avoid hitting rate limits
+    let result = await Store.loginUser(guestEmail, guestPass);
+    
+    // If login fails (account doesn't exist), try to register
+    if (!result.ok) {
+      result = await Store.registerUser('अतिथि (Guest)', guestEmail, guestPass);
+    }
+    
+    if (result.ok) {
+      const user = await Store.getUser();
+      if (!user) {
+         if (errorEl) {
+           errorEl.textContent = 'ईमेल पुष्टिकरण आवश्यक है। अतिथि लॉगिन समर्थित नहीं है।';
+           errorEl.style.display = 'block';
+         }
+         return;
+      }
+      _refreshAppShell();
+      Components.showToast('अतिथि देवो भव 🙏', 'success');
+      Router.navigate('home');
+    } else {
+      if (errorEl) {
+        errorEl.textContent = result.error || 'अतिथि लॉगिन विफल';
+        errorEl.style.display = 'block';
+      }
+    }
+  } catch (err) {
+    if (errorEl) {
+      errorEl.textContent = err.message;
+      errorEl.style.display = 'block';
+    }
   }
 }
 

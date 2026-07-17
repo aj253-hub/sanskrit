@@ -27,13 +27,18 @@ const Store = {
       password: password.trim()
     });
     if (error) return { ok: false, error: error.message };
+    if (!data || !data.user) return { ok: false, error: 'खाता नहीं बन सका। कृपया पुनः प्रयास करें।' };
 
-    // Create the matching profile row
-    await supabaseClient.from('profiles').insert({
-      id: data.user.id,
-      name,
-      goal: 'CUET'
-    });
+    try {
+      // Create the matching profile row
+      await supabaseClient.from('profiles').insert({
+        id: data.user.id,
+        name,
+        goal: 'CUET'
+      });
+    } catch(err) {
+      console.error(err);
+    }
 
     this._emit('user', data.user);
     return { ok: true, user: data.user };
@@ -73,9 +78,26 @@ const Store = {
       .eq('id', data.user.id)
       .single();
       
+    // Fetch active pass for user securely from server truth
+    const { data: passes } = await supabaseClient
+      .from('passes')
+      .select('*')
+      .eq('user_id', data.user.id)
+      .eq('status', 'active')
+      .gt('expiry_date', new Date().toISOString())
+      .order('expiry_date', { ascending: false })
+      .limit(1);
+
+    const activePass = passes && passes.length > 0 ? passes[0] : null;
+
     // Remap db snake_case to app camelCase
     const user = { ...data.user, ...profile };
     user.isAdmin = profile?.is_admin || false;
+    
+    // isPro is strictly derived from the existence of an active, unexpired pass
+    user.isPro = !!activePass;
+    user.activePass = activePass;
+
     user.lastActive = new Date(profile?.last_active || Date.now()).getTime();
     user.dailyGoal = profile?.daily_goal || 20;
     return user;
@@ -301,6 +323,16 @@ const Store = {
 
   // ── Secure Answer Checking ── //
   async getCorrectAnswer(q_id) {
+    // Built-in questions always have the correct answer at index 0 of the original array.
+    // This entirely prevents database answer key mismatches and dynamic ID shift bugs.
+    if (!q_id.includes('custom_') && typeof QUESTION_MAP !== 'undefined' && QUESTION_MAP[q_id]) {
+      const q = QUESTION_MAP[q_id];
+      if (q && q.opts && q.opts.length > 0) {
+        return q.opts[0];
+      }
+    }
+
+    // For custom questions created by admins, fetch securely from Supabase
     const { data, error } = await supabaseClient.rpc('get_correct_answer', { q_id });
     if (error) {
       console.error('Error fetching correct answer:', error);

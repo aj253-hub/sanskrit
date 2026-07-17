@@ -5,6 +5,10 @@
 async function renderHomePage() {
   const container = document.getElementById('app-content');
   const user = await Store.getUser();
+  if (!user) {
+    Router.navigate('login');
+    return;
+  }
   const profile = await Store.getProfile();
   const stats = await Store.getStats();
   const todayStats = await Store.getTodayStats();
