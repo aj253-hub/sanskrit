@@ -6,10 +6,10 @@ const AI = {
   _history: [],
 
   // Set your API key here to test locally without a backend
-  _apiKey: 'AQ.Ab8RN6LFdfrCEbtOVUQTwYVcgar74XnxVopR7M_uiBIkl0FAyQ',
+  _apiKey: 'AQ.Ab8RN6LrP8wIqJl8VBJ2AUrZaTaVec_oiG1J-AWKboOs7hxWIw',
 
   // Direct Google Gemini API endpoint
-  _apiUrl: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
+  _apiUrl: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent',
 
   init() {
     this._renderChatWindow();
