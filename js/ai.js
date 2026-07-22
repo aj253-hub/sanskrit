@@ -4,13 +4,16 @@
 
 const AI = {
   _history: [],
-  
-  // AI endpoint (should point to a backend route like Vercel serverless function)
-  _apiUrl: '/api/ai',
+
+  // Set your API key here to test locally without a backend
+  _apiKey: 'AQ.Ab8RN6LFdfrCEbtOVUQTwYVcgar74XnxVopR7M_uiBIkl0FAyQ',
+
+  // Direct Google Gemini API endpoint
+  _apiUrl: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
 
   init() {
     this._renderChatWindow();
-    
+
     // Add initial greeting if history is empty
     if (this._history.length === 0) {
       this._addMessage("नमो नमः! 🙏 मैं संस्कृत गुरु हूँ। आप मुझसे संस्कृत व्याकरण, साहित्य, या परीक्षा से सम्बंधित कोई भी प्रश्न पूछ सकते हैं।", 'bot');
@@ -80,14 +83,33 @@ const AI = {
   async _handleUserMessage(text) {
     this._addMessage(text, 'user');
     const typingId = this._addTypingIndicator();
-    
+
     try {
-      const prompt = `You are "Sanskrit Guru", an expert AI assistant for "Sanskrit Setu", an exam prep platform for CUET, Shastri, Acharya, and UGC NET. Answer the following question primarily in Hindi (with Sanskrit terms where appropriate). Be very concise, accurate, and encouraging. \n\nQuestion: ${text}`;
-      
-      const response = await fetch(this._apiUrl, {
+      const prompt = `You are "Sanskrit Guru", an expert AI assistant for "Sanskrit Setu", an exam prep platform. You are also an expert in Pāṇinian Sanskrit Grammar, similar to Shaabdabodha. 
+When the user provides a śloka or asks for grammatical analysis, provide a complete traditional vyākaraṇa analysis with every step grounded in Pāṇinian sūtras and classical commentaries. Include the following sections if applicable:
+1. पदच्छेदः — word separation
+2. सन्धि-विग्रहः — sandhi breakdown with sūtra
+3. समास-विग्रहः — compound resolution
+4. शब्दरूप-विश्लेषणम् — nominal morphology with English meaning
+5. धातुरूप-विश्लेषणम् — verbal morphology with Sanskrit + English meaning
+6. कारक-विभक्ति-सम्बन्धः — kāraka theory
+7. अन्वयः — prose ordering
+8. श्लोकार्थः — meaning in Sanskrit, Hindi and English
+9. छन्दः — metre 
+10. अलङ्कारः — figures of speech
+
+If the user asks a general question, answer primarily in Hindi (with Sanskrit terms where appropriate). Be accurate and encouraging.
+
+Question: ${text}`;
+
+      const response = await fetch(`${this._apiUrl}?key=${this._apiKey}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: prompt })
+        body: JSON.stringify({
+          contents: [{
+            parts: [{ text: prompt }]
+          }]
+        })
       });
 
       const data = await response.json();
@@ -118,7 +140,7 @@ const AI = {
     const msgEl = document.createElement('div');
     msgEl.id = id;
     msgEl.className = `ai-msg ${sender === 'user' ? 'ai-msg-user' : 'ai-msg-bot'}`;
-    
+
     // Parse basic markdown to HTML
     let parsedText = Utils.escapeHtml(text)
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
